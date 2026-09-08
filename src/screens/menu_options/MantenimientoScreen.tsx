@@ -1,12 +1,35 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function MantenimientoScreen({ navigation }: any) {
+  
+  // Función para abrir la galería y seleccionar la moto
+  const abrirGaleria = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (permissionResult.granted === false) {
+      Alert.alert('Permiso denegado', 'Necesitamos acceso a tu galería para cargar la moto.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      // Navegamos al editor y le pasamos la foto elegida
+      navigation.navigate('SimuladorEditor', { uriFotoMoto: result.assets[0].uri });
+    }
+  };
+
   return (
     <View style={styles.container}>
       
-      {/* HEADER CON BOTÓN DE REGRESO (Mantiene tu diseño original) */}
+      {/* HEADER CON BOTÓN DE REGRESO */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={28} color="#0f172a" />
@@ -15,13 +38,12 @@ export default function MantenimientoScreen({ navigation }: any) {
         <View style={{ width: 28 }} />
       </View>
 
-      {/* CONTENIDO DEL SIMULADOR (Reemplaza el estado de "En construcción") */}
       <ScrollView contentContainerStyle={styles.content}>
         
-        {/* Botón Principal que navega al Editor */}
+        {/* Botón Principal (AHORA ABRE LA GALERÍA) */}
         <TouchableOpacity 
           style={styles.mainButton}
-          onPress={() => navigation.navigate('SimuladorEditor')}
+          onPress={abrirGaleria}
         >
           <Ionicons name="camera-outline" size={48} color="#3b82f6" />
           <Text style={styles.mainButtonText}>Iniciar Nuevo Diseño</Text>
@@ -57,7 +79,6 @@ export default function MantenimientoScreen({ navigation }: any) {
             <Text style={styles.gridText}>Crear Paleta</Text>
           </TouchableOpacity>
           
-          {/* Botón que navega a la Librería */}
           <TouchableOpacity style={styles.gridItem} onPress={() => navigation.navigate('SimuladorLibreria')}>
             <Ionicons name="images-outline" size={28} color="#8b5cf6" />
             <Text style={styles.gridText}>Mis Diseños</Text>
